@@ -1,86 +1,165 @@
-import type { NextPage } from 'next'
-import Head from 'next/head'
-import Image from 'next/image'
+import { useState } from "react";
+import axios from "axios";
 
-const Home: NextPage = () => {
+import Input from "../components/Input";
+export default function Home() {
+  const [locState, setLocState] = useState("VA");
+  const [covidData, setCovidData] = useState(null);
+  /**
+   *
+   *
+   * Fetch the covid data returned
+   */
+  const stateOptions = {
+    None: "Select a State",
+    AL: "Alabama",
+    AK: "Alaska",
+    AZ: "Arizona",
+    AR: "Arkansas",
+    CA: "California",
+    CO: "Colorado",
+    CT: "Connecticut",
+    DE: "Delaware",
+    ME: "Maine",
+    MD: "Maryland",
+    MA: "Massachusetts",
+    MI: "Michigan",
+    MN: "Minnesota",
+    MS: "Mississippi",
+    MO: "Missouri",
+    MT: "Montana",
+    NE: "Nebraska",
+    NV: "Nevada",
+    NH: "New Hampshire",
+    NJ: "New Jersey",
+    NM: "New Mexico",
+    NY: "New York",
+    NC: "North Carolina",
+    ND: "North Dakota",
+    OH: "Ohio",
+    OK: "Oklahoma",
+    OR: "Oregon",
+    PA: "Pennsylvania",
+    RI: "Rhode Island",
+    SC: "South Carolina",
+    SD: "South Dakota",
+    TN: "Tennessee",
+    TX: "Texas",
+    UT: "Utah",
+    VT: "Vermont",
+    VA: "Virginia",
+    WA: "Washington",
+    WV: "West Virginia",
+    WI: "Wisconsin",
+    WY: "Wyoming",
+  };
+
+  const arrOfStates = Object.keys(stateOptions);
+
+  const getCovidData = (locState) => {
+    setLocState(locState);
+
+    const options = {
+      method: "GET",
+      url: "http://localhost:3000/api/covid",
+      params: { locState },
+    };
+    axios
+      .request(options)
+      .then(function (response) {
+        const { data } = response;
+        setCovidData(data);
+      })
+      .catch(function (error) {
+        console.error(error);
+      });
+  };
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center py-2">
-      <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <main className="flex w-full flex-1 flex-col items-center justify-center px-20 text-center">
-        <h1 className="text-6xl font-bold">
-          Welcome to{' '}
-          <a className="text-blue-600" href="https://nextjs.org">
-            Next.js!
-          </a>
-        </h1>
-
-        <p className="mt-3 text-2xl">
-          Get started by editing{' '}
-          <code className="rounded-md bg-gray-100 p-3 font-mono text-lg">
-            pages/index.tsx
-          </code>
-        </p>
-
-        <div className="mt-6 flex max-w-4xl flex-wrap items-center justify-around sm:w-full">
-          <a
-            href="https://nextjs.org/docs"
-            className="mt-6 w-96 rounded-xl border p-6 text-left hover:text-blue-600 focus:text-blue-600"
-          >
-            <h3 className="text-2xl font-bold">Documentation &rarr;</h3>
-            <p className="mt-4 text-xl">
-              Find in-depth information about Next.js features and its API.
-            </p>
-          </a>
-
-          <a
-            href="https://nextjs.org/learn"
-            className="mt-6 w-96 rounded-xl border p-6 text-left hover:text-blue-600 focus:text-blue-600"
-          >
-            <h3 className="text-2xl font-bold">Learn &rarr;</h3>
-            <p className="mt-4 text-xl">
-              Learn about Next.js in an interactive course with quizzes!
-            </p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/canary/examples"
-            className="mt-6 w-96 rounded-xl border p-6 text-left hover:text-blue-600 focus:text-blue-600"
-          >
-            <h3 className="text-2xl font-bold">Examples &rarr;</h3>
-            <p className="mt-4 text-xl">
-              Discover and deploy boilerplate example Next.js projects.
-            </p>
-          </a>
-
-          <a
-            href="https://vercel.com/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className="mt-6 w-96 rounded-xl border p-6 text-left hover:text-blue-600 focus:text-blue-600"
-          >
-            <h3 className="text-2xl font-bold">Deploy &rarr;</h3>
-            <p className="mt-4 text-xl">
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
-      </main>
-
-      <footer className="flex h-24 w-full items-center justify-center border-t">
-        <a
-          className="flex items-center justify-center gap-2"
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+    <div className="flex flex-col items-center">
+      <h2 className="font-raleway font-bold text-6xl text-primary pt-20 pb-6 md:text-3xl">
+        <span className="text-danger">COVID Dashboard</span> App
+      </h2>
+      <p>
+        <select
+          name="states"
+          onChange={(e) => getCovidData(e.target.value)}
+          className="px-4 py-2 rounded border-2"
         >
-          Powered by{' '}
-          <Image src="/vercel.svg" alt="Vercel Logo" width={72} height={16} />
-        </a>
-      </footer>
+          {arrOfStates.map((s) => (
+            <option value={s} key={s}>
+              {stateOptions[s]}
+            </option>
+          ))}
+        </select>
+      </p>
+      <hr />
+      <br />
+      {covidData && (
+        <div name="Results">
+          <p className="font-raleway font-bold text-lg tracking-wider md:text-base">
+            <span className="text-danger">
+              <b>{stateOptions[covidData.state]} Data</b>
+              <br />
+              Positivity Rate:{" "}
+              {`${
+                Math.round(covidData.metrics.testPositivityRatio * 100 * 10) /
+                10
+              } `}
+              %
+              <br />
+              Covid Cases: {covidData.actuals.cases.toLocaleString()} <br />
+              Deaths: {covidData.actuals.deaths.toLocaleString()} <br />
+              <font color="Red">Hospital Utilization</font>
+              <br />
+              Hospital Beds:{" "}
+              {covidData.actuals.hospitalBeds.currentUsageTotal.toLocaleString()}{" "}
+              (
+              {Math.round(
+                (covidData.actuals.hospitalBeds.currentUsageTotal /
+                  covidData.actuals.hospitalBeds.capacity) *
+                  100 *
+                  10
+              ) / 10}
+              % capacity)
+              <br />
+              Covid Beds:{" "}
+              {covidData.actuals.hospitalBeds.currentUsageCovid.toLocaleString()}{" "}
+              (
+              {Math.round(
+                (covidData.actuals.hospitalBeds.currentUsageCovid /
+                  covidData.actuals.hospitalBeds.capacity) *
+                  100 *
+                  10
+              ) / 10}
+              % capacity)
+              <br />
+              ICU Beds:{" "}
+              {covidData.actuals.icuBeds.currentUsageTotal.toLocaleString()} (
+              {Math.round(
+                (covidData.actuals.icuBeds.currentUsageTotal /
+                  covidData.actuals.icuBeds.capacity) *
+                  100 *
+                  10
+              ) / 10}
+              % capacity)
+              <br />
+              Covid ICU Beds:{" "}
+              {covidData.actuals.icuBeds.currentUsageCovid.toLocaleString()} (
+              {Math.round(
+                (covidData.actuals.icuBeds.currentUsageCovid /
+                  covidData.actuals.icuBeds.capacity) *
+                  100 *
+                  10
+              ) / 10}
+              % capacity)
+              <br />
+            </span>
+          </p>
+          <p>
+            <font color="Black"> As of: {covidData.lastUpdatedDate}</font>
+          </p>
+        </div>
+      )}
     </div>
-  )
+  );
 }
-
-export default Home
