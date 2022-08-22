@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { SetStateAction, useState } from "react";
 import axios from "axios";
 
 import Input from "../components/Input";
@@ -56,6 +56,33 @@ export default function Home() {
 
   const arrOfStates = Object.keys(stateOptions);
 
+  const displayData = (
+    dataReturned: any,
+    roundData: boolean,
+    addCommas: boolean,
+    isPercentage: boolean
+  ) => {
+    if (dataReturned) {
+      var returnString = dataReturned;
+      var percentageMultiplier = 1;
+      if (isPercentage) percentageMultiplier = 100;
+      if (roundData)
+        returnString =
+          Math.round(returnString * percentageMultiplier * 10) / 10;
+      if (addCommas) returnString = returnString.toLocaleString();
+      if (isPercentage) returnString = returnString + "%";
+      return returnString;
+    } else return "No data.";
+  };
+  function calculatePercentageAndDisplay(data1: any, data2: any) {
+    var percentageResult;
+    if (data1 && data2) {
+      percentageResult = Math.round((data1 / data2) * 100 * 10) / 10;
+      percentageResult = percentageResult + "%";
+    }
+    return percentageResult;
+  }
+
   const getCovidData = (locState) => {
     setLocState(locState);
 
@@ -92,66 +119,81 @@ export default function Home() {
           ))}
         </select>
       </p>
-      <hr />
-      <br />
+
       {covidData && (
-        <div name="Results">
+        <div className="flex flex-col items-center">
           <p className="font-raleway font-bold text-lg tracking-wider md:text-base">
             <span className="text-danger">
               <b>{stateOptions[covidData.state]} Data</b>
               <br />
               Positivity Rate:{" "}
-              {`${
-                Math.round(covidData.metrics.testPositivityRatio * 100 * 10) /
-                10
-              } `}
-              %
+              {displayData(
+                covidData.metrics.testPositivityRatio,
+                true,
+                false,
+                true
+              )}
               <br />
-              Covid Cases: {covidData.actuals.cases.toLocaleString()} <br />
-              Deaths: {covidData.actuals.deaths.toLocaleString()} <br />
+              Covid Cases:{" "}
+              {displayData(covidData.actuals.cases, false, true, false)} <br />
+              Deaths:{" "}
+              {displayData(covidData.actuals.deaths, false, true, false)} <br />
               <font color="Red">Hospital Utilization</font>
               <br />
               Hospital Beds:{" "}
-              {covidData.actuals.hospitalBeds.currentUsageTotal.toLocaleString()}{" "}
+              {displayData(
+                covidData.actuals.hospitalBeds.currentUsageTotal,
+                false,
+                true,
+                false
+              )}{" "}
               (
-              {Math.round(
-                (covidData.actuals.hospitalBeds.currentUsageTotal /
-                  covidData.actuals.hospitalBeds.capacity) *
-                  100 *
-                  10
-              ) / 10}
-              % capacity)
-              <br />
+              {calculatePercentageAndDisplay(
+                covidData.actuals.hospitalBeds.currentUsageTotal,
+                covidData.actuals.hospitalBeds.capacity
+              )}
+              ) <br />
               Covid Beds:{" "}
-              {covidData.actuals.hospitalBeds.currentUsageCovid.toLocaleString()}{" "}
+              {displayData(
+                covidData.actuals.hospitalBeds.currentUsageCovid,
+                false,
+                true,
+                false
+              )}{" "}
               (
-              {Math.round(
-                (covidData.actuals.hospitalBeds.currentUsageCovid /
-                  covidData.actuals.hospitalBeds.capacity) *
-                  100 *
-                  10
-              ) / 10}
-              % capacity)
+              {calculatePercentageAndDisplay(
+                covidData.actuals.hospitalBeds.currentUsageCovid,
+                covidData.actuals.hospitalBeds.capacity
+              )}
+              )
               <br />
               ICU Beds:{" "}
-              {covidData.actuals.icuBeds.currentUsageTotal.toLocaleString()} (
-              {Math.round(
-                (covidData.actuals.icuBeds.currentUsageTotal /
-                  covidData.actuals.icuBeds.capacity) *
-                  100 *
-                  10
-              ) / 10}
-              % capacity)
+              {displayData(
+                covidData.actuals.icuBeds.currentUsageTotal,
+                false,
+                true,
+                false
+              )}{" "}
+              (
+              {calculatePercentageAndDisplay(
+                covidData.actuals.icuBeds.currentUsageTotal,
+                covidData.actuals.icuBeds.capacity
+              )}
+              )
               <br />
               Covid ICU Beds:{" "}
-              {covidData.actuals.icuBeds.currentUsageCovid.toLocaleString()} (
-              {Math.round(
-                (covidData.actuals.icuBeds.currentUsageCovid /
-                  covidData.actuals.icuBeds.capacity) *
-                  100 *
-                  10
-              ) / 10}
-              % capacity)
+              {displayData(
+                covidData.actuals.icuBeds.currentUsageCovid,
+                false,
+                true,
+                false
+              )}{" "}
+              (
+              {calculatePercentageAndDisplay(
+                covidData.actuals.icuBeds.currentUsageCovid,
+                covidData.actuals.icuBeds.capacity
+              )}
+              )
               <br />
             </span>
           </p>
